@@ -60,7 +60,14 @@ func (context Context) execute(filePath string, reqTime string, bd []byte) Respo
 	if bd != nil {
 		b = bytes.Join([][]byte{b, []byte("\n\n"), bd, []byte("\n")}, nil)
 	}
-	filetype, _ := exec.Command("file", filePath).Output()
+	filetype, err := exec.Command("file", filePath).Output()
+	if err != nil {
+		return Response{
+			statusCode: 500,
+			headers:    map[string]string{},
+			body:       "Internal Server Error",
+		}
+	}
 	cmd := exec.Command("cat")
 	if strings.HasSuffix(filePath, ".bevy") {
 		cmdP := exec.Command("/opt/bevyframe/bin/bevyframe_page", filePath)
@@ -72,11 +79,11 @@ func (context Context) execute(filePath string, reqTime string, bd []byte) Respo
 				body:       "Internal Server Error",
 			}
 		}
-		cmd = exec.Command("/Users/islekcaganmert/src/islekcaganmert/bevyframe/.venv/bin/bevyframe_html", string(out))
+		cmd = exec.Command(context.app.manifest.SDKs["html"], string(out))
 	} else if strings.Contains(string(filetype), "Python script text executable") {
-		cmd = exec.Command("/Users/islekcaganmert/src/islekcaganmert/bevyframe/.venv/bin/bevyframe_py", filePath)
+		cmd = exec.Command(context.app.manifest.SDKs["python"], filePath)
 	} else if strings.Contains(string(filetype), "HTML document text") {
-		cmd = exec.Command("/Users/islekcaganmert/src/islekcaganmert/bevyframe/.venv/bin/bevyframe_html", filePath)
+		cmd = exec.Command(context.app.manifest.SDKs["html"], filePath)
 	} else {
 		extS := strings.Split(filePath, ".")
 		ext := extS[len(extS)-1]
@@ -84,8 +91,22 @@ func (context Context) execute(filePath string, reqTime string, bd []byte) Respo
 			r = "const stdin = \"" + strings.ReplaceAll(r, "\"", "\\\"") + "\""
 			r = strings.ReplaceAll(r, "\n", "\\n") + "\n"
 			r += CreateBridgeScript() + "\n"
-			script, _ := os.ReadFile(filePath)
-			renderJSb, _ := os.ReadFile("/opt/bevyframe/scripts/renderJS.js")
+			script, err := os.ReadFile(filePath)
+			if err != nil {
+				return Response{
+					statusCode: 500,
+					headers:    map[string]string{},
+					body:       "Internal Server Error",
+				}
+			}
+			renderJSb, err := os.ReadFile("/opt/bevyframe/scripts/renderJS.js")
+			if err != nil {
+				return Response{
+					statusCode: 500,
+					headers:    map[string]string{},
+					body:       "Internal Server Error",
+				}
+			}
 			renderJS := string(renderJSb)
 			renderJS = strings.ReplaceAll(renderJS, "/* PAGE SCRIPT HERE */", string(script))
 			r += renderJS

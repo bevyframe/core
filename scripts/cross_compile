@@ -1,0 +1,14 @@
+#!/bin/sh
+GOOS=linux     GOARCH=amd64 scripts/compile
+GOOS=linux     GOARCH=arm64 scripts/compile
+GOOS=darwin    GOARCH=arm64 scripts/compile
+GOOS=android   GOARCH=arm64 scripts/compile
+GOOS=aix       GOARCH=ppc64 scripts/compile
+GOOS=dragonfly GOARCH=amd64 scripts/compile
+GOOS=freebsd   GOARCH=amd64 scripts/compile
+GOOS=freebsd   GOARCH=arm64 scripts/compile
+GOOS=netbsd    GOARCH=amd64 scripts/compile
+GOOS=netbsd    GOARCH=arm64 scripts/compile
+GOOS=openbsd   GOARCH=amd64 scripts/compile
+GOOS=openbsd   GOARCH=arm64 scripts/compile
+GOOS=solaris   GOARCH=amd64 scripts/compile

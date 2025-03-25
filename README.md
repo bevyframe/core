@@ -59,3 +59,14 @@ $ curl -sSL https://bevyframe.islekcaganmert.me/install.sh | bash
 ## Building from Source
 
 *soon*
+
+## Links
+[Documentation](https://bevyframe.islekcaganmert.me) •
+[Source Code](https://github.com/bevyframe/core) •
+[Issue Tracker](https://github.com/islekcaganmert/bevyframe/issues) • 
+[Bluesky](https://bsky.app/profile/bevyframe.islekcaganmert.me) •
+[Fediverse](https://social.hereus.net/@bevyframe) • 
+[X *(soon)*]() •
+[Reddit](https://www.reddit.com/r/bevyframe) •
+[Lemmy](https://lemmy.today/c/bevyframe) •
+[Discord]()

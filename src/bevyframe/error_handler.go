@@ -14,14 +14,20 @@ func (app Frame) errorHandler(traceback string) []byte {
 	traceback = strings.ReplaceAll(traceback, "\n", "</br>")
 	traceback = strings.ReplaceAll(traceback, " ", "&nbsp;")
 	traceback = strings.ReplaceAll(traceback, "\"", "\\\"")
-	prop, _ := json.Marshal(map[string]string{
+	prop, err := json.Marshal(map[string]string{
 		"style": "font-family: monospace; padding: 20px;",
 		"class": "the_box",
 	})
+	if err != nil {
+		fmt.Println(err)
+	}
 	var widgets string
 	if strings.HasPrefix(traceback, "Traceback&nbsp;(most&nbsp;recent&nbsp;call&nbsp;last):</br>") {
 		traceback = strings.TrimPrefix(traceback, "Traceback&nbsp;(most&nbsp;recent&nbsp;call&nbsp;last):</br>")
-		pwd, _ := os.Getwd()
+		pwd, err := os.Getwd()
+		if err != nil {
+			fmt.Println(err)
+		}
 		traceback = strings.ReplaceAll(traceback, fmt.Sprintf("File&nbsp;\\\"%s/pages/", pwd), "Path&nbsp;\\\"")
 		lines := strings.Split(traceback, "</br>")
 		lastLine := lines[len(lines)-1]

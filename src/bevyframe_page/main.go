@@ -22,7 +22,11 @@ func main() {
 	}(file)
 	var page Page
 	decoder := xml.NewDecoder(file)
-	_ = decoder.Decode(&page)
+	err = decoder.Decode(&page)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	fmt.Print("<!DOCTYPE html>")
 	fmt.Print("<html>")

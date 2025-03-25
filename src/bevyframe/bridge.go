@@ -9,7 +9,11 @@ import (
 
 func CreateBridgeScript() string {
 	functions := ""
-	dir, _ := os.ReadDir("./functions/")
+	dir, err := os.ReadDir("./functions/")
+	if err != nil {
+		fmt.Println(err)
+		return "{\"error\": \"Application is broken\"}"
+	}
 	for _, i := range dir {
 		if strings.HasSuffix(i.Name(), ".py") {
 			name := i.Name()[:len(i.Name())-3]
@@ -30,11 +34,17 @@ func (self Context) ProcessBridgeProxy(function string, args string, reqTime str
 		return "{\"error\": \"Invalid function name\"}", nil
 	}
 	fmt.Printf("%s(...) -> ", function)
-	pwd, _ := os.Getwd()
+	pwd, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+	}
 	filePath := fmt.Sprintf("%s/functions/%s", pwd, function)
 	resp := self.execute(filePath, reqTime, []byte(args))
 	respM := make(map[string]interface{})
-	_ = json.Unmarshal([]byte(resp.body), &respM)
+	err = json.Unmarshal([]byte(resp.body), &respM)
+	if err != nil {
+		fmt.Println(err)
+	}
 	if respM["error"] != nil {
 		fmt.Println("error")
 	} else if respM["type"] != nil {

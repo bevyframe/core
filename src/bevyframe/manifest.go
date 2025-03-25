@@ -8,12 +8,13 @@ import (
 )
 
 type Manifest struct {
-	Context     string      `json:"@context"`
-	App         App         `json:"app"`
-	Publishing  Publishing  `json:"publishing"`
-	Accounts    Accounts    `json:"accounts"`
-	Development Environment `json:"development"`
-	Production  Environment `json:"production"`
+	Context     string            `json:"@context"`
+	App         App               `json:"app"`
+	Publishing  Publishing        `json:"publishing"`
+	Accounts    Accounts          `json:"accounts"`
+	Development Environment       `json:"development"`
+	Production  Environment       `json:"production"`
+	SDKs        map[string]string `json:"sdks"`
 }
 
 type App struct {
@@ -55,7 +56,10 @@ func loadManifest() (*Manifest, error) {
 		return nil, fmt.Errorf("failed to open manifest.json: %w", err)
 	}
 	defer func(file *os.File) {
-		_ = file.Close()
+		err = file.Close()
+		if err != nil {
+			fmt.Println("failed to close manifest.json:", err)
+		}
 	}(file)
 
 	data, err := io.ReadAll(file)

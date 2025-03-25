@@ -42,7 +42,11 @@ func newServer(manifest Manifest) Frame {
 	var style []byte
 	if styleType == "python" {
 		styleCmd := exec.Command("/Users/islekcaganmert/src/islekcaganmert/bevyframe/.venv/bin/bevystyle_py", styleName)
-		style, _ = styleCmd.Output()
+		style, err = styleCmd.Output()
+		if err != nil {
+			fmt.Println("Error running style command:", err)
+			os.Exit(1)
+		}
 	} else if styleType == "https" {
 		resp, err := http.Get(fmt.Sprintf("https:%s", styleName))
 		if err != nil {
@@ -50,7 +54,10 @@ func newServer(manifest Manifest) Frame {
 			os.Exit(1)
 		}
 		defer func(Body io.ReadCloser) {
-			_ = Body.Close()
+			err = Body.Close()
+			if err != nil {
+				fmt.Println("Error closing resp.Body:", err)
+			}
 		}(resp.Body)
 		style, err = io.ReadAll(resp.Body)
 		if err != nil {
@@ -69,8 +76,16 @@ func newServer(manifest Manifest) Frame {
 func (self Frame) runServer(debug bool) {
 	http.HandleFunc("/.well-known/bevyframe/pwa.webmanifest", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		out, _ := self.processPWA()
-		_, _ = w.Write(out)
+		out, err := self.processPWA()
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		_, err = w.Write(out)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 	})
 	http.HandleFunc("/.well-known/bevyframe/widgets.js", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "/opt/bevyframe/scripts/widgets.js")
@@ -83,8 +98,16 @@ func (self Frame) runServer(debug bool) {
 	})
 	http.HandleFunc("/sw.js", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/javascript")
-		out, _ := self.getServiceWorker()
-		_, _ = w.Write(out)
+		out, err := self.getServiceWorker()
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		_, err = w.Write(out)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 	})
 	http.HandleFunc("/assets/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, fmt.Sprintf(".%s", r.URL.Path))
@@ -126,9 +149,17 @@ func (self Frame) runServer(debug bool) {
 			headers: headersToMap(r.Header),
 			query:   map[string]string{},
 		}
-		resp, _ := context.ProcessBridgeProxy(function, args, reqTime)
+		resp, err := context.ProcessBridgeProxy(function, args, reqTime)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(resp))
+		_, err = w.Write([]byte(resp))
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 	})
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		s := ""
@@ -161,7 +192,10 @@ func (self Frame) runServer(debug bool) {
 		}
 		reqTime := time.Now().UTC().Format("01/02/2006 03:04:05 PM")
 		fmt.Printf("(   ) %s [%s] %s %s   ", id, reqTime, context.method, context.path)
-		pwd, _ := os.Getwd()
+		pwd, err := os.Getwd()
+		if err != nil {
+			fmt.Println(err)
+		}
 		filePath := fmt.Sprintf("%s/pages%s", pwd, context.path)
 		for key, value := range context.app.manifest.App.Routing {
 			variables, err := matchRouting(key, context.path)
@@ -183,14 +217,22 @@ func (self Frame) runServer(debug bool) {
 				filePath, err = findFilePath(filePath)
 			}
 		}
-		body, _ := io.ReadAll(r.Body)
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 		resp = context.execute(filePath, reqTime, body)
 		for key, value := range resp.headers {
 			w.Header().Set(key, value)
 		}
 		w.WriteHeader(resp.statusCode)
 		fmt.Printf("\r(%d)\n", resp.statusCode)
-		_, _ = w.Write([]byte(resp.body))
+		_, err = w.Write([]byte(resp.body))
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 	})
 	fmt.Println("\nBevyFrame 0.6 ⍺")
 	fmt.Printf(" * Serving BevyFrame app '%s'\n", self.manifest.App.Package)

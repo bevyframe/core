@@ -1,20 +1,30 @@
 #!/bin/sh
-CWD="$(pwd)"
 
-if [ -d "build" ]; then
-  rm -rf build
+if [ -z "${PROJECT_ROOT:-}" ]; then
+  echo "PROJECT_ROOT is not set"
+  exit 1
+fi
+
+if [ -d "${PROJECT_ROOT}/build" ]; then
+  rm -rf mkdir "${PROJECT_ROOT}/build"
+fi
+
+cd "${PROJECT_ROOT}" || exit
+
+if [ ! -d "dist" ]; then
+  mkdir "${PROJECT_ROOT}/dist"
 fi
 mkdir build build/tarball
 
 # /opt/bevyframe/bin/bevyframe
 cd src/bevyframe || exit
 go build || exit
-cd "${CWD}" || exit
+cd "${PROJECT_ROOT}" || exit
 
 # /opt/bevyframe/bin/bevyframe_page
 cd src/bevyframe_page || exit
 go build || exit
-cd "${CWD}" || exit
+cd "${PROJECT_ROOT}" || exit
 
 # /opt/bevyframe
 mkdir build/tarball/bin
@@ -24,12 +34,12 @@ mv src/bevyframe_page/bevyframe_page build/tarball/bin/bevyframe_page
 chmod +x build/tarball/bin/bevyframe_page
 cp -r src/scripts build/tarball/scripts
 
-mkdir dist
 cd build/tarball || exit
 # shellcheck disable=SC2035
-tar -cvf "${CWD}/dist/bevyframe.tar" *
-cd "${CWD}/dist" || exit
+tar -cf "${PROJECT_ROOT}/src/installer/bevyframe.tar" *
+cd "${PROJECT_ROOT}/src/installer" || exit
 gzip bevyframe.tar
-cd "${CWD}" || exit
-
-sudo
+rm "${PROJECT_ROOT}/dist/bevyframe_installer_${GOOS}_${GOARCH}" > /dev/null 2>&1
+go build -o "${PROJECT_ROOT}/dist/bevyframe_installer_${GOOS}_${GOARCH}" || exit
+rm bevyframe.tar.gz
+cd "${PROJECT_ROOT}" || exit

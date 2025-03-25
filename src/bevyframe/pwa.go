@@ -114,7 +114,10 @@ func (frame Frame) getServiceWorker() ([]byte, error) {
 		return []byte{}, fmt.Errorf("failed to open manifest.json: %w", err)
 	}
 	defer func(file *os.File) {
-		_ = file.Close()
+		err = file.Close()
+		if err != nil {
+			fmt.Println("failed to close manifest.json:", err)
+		}
 	}(file)
 	data, err := io.ReadAll(file)
 	if err != nil {

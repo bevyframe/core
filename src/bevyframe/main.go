@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bevyframe/contextManager"
 	"bufio"
 	"crypto/rand"
 	"encoding/hex"
@@ -29,6 +30,7 @@ func mainRun(isDebug bool) {
 		return
 	}
 	frame := newServer(*manifest)
+	go contextManager.Run(manifest.App.Package)
 	frame.runServer(isDebug)
 }
 

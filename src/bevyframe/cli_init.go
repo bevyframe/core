@@ -7,11 +7,26 @@ import (
 )
 
 func mainInit() {
-	name, _ := input("\nName: ")
-	packageName, _ := input("Package: ")
-	description, _ := input("Description: ")
-	style, _ := input("Style: ")
-	defaultNetwork, _ := input("Default Network: ")
+	name, err := input("\nName: ")
+	if err != nil {
+		fmt.Println(err)
+	}
+	packageName, err := input("Package: ")
+	if err != nil {
+		fmt.Println(err)
+	}
+	description, err := input("Description: ")
+	if err != nil {
+		fmt.Println(err)
+	}
+	style, err := input("Style: ")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defaultNetwork, err := input("Default Network: ")
+	if err != nil {
+		fmt.Println(err)
+	}
 	fmt.Println()
 	manifest := Manifest{
 		Context: "https://bevyframe.islekcaganmert.me/ns/manifest",
@@ -48,12 +63,25 @@ func mainInit() {
 			Host: "0.0.0.0",
 			Port: 80,
 		},
+		SDKs: map[string]string{},
 	}
-	manifestJson, _ := json.Marshal(manifest)
-	_ = os.WriteFile("manifest.json", manifestJson, 0644)
+	manifestJson, err := json.Marshal(manifest)
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = os.WriteFile("manifest.json", manifestJson, 0644)
+	if err != nil {
+		fmt.Println(err)
+	}
 	for _, dir := range []string{"functions", "assets", "pages", "src", "strings"} {
-		_ = os.Mkdir(dir, 0744)
+		err = os.Mkdir(dir, 0744)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 	secret := mainSecret()
-	_ = os.WriteFile(".secret", []byte(secret), 0644)
+	err = os.WriteFile(".secret", []byte(secret), 0644)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
