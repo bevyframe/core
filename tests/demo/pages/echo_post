@@ -1,0 +1,16 @@
+#!/bin/sh
+
+RAW_REQUEST="$(cat)"
+METHOD="$(echo "${RAW_REQUEST}" | grep -i '^Method:' | awk '{print $2}')"
+
+if [ "${METHOD}" = "GET" ]; then
+  echo "bash 200"
+  echo "Content-Type: text/html"
+  echo
+  echo '<form method="POST"><input type="text" name="demo"></form>'
+else
+  echo "bash 200"
+  echo "Content-Type: text/plain"
+  echo
+  echo "${RAW_REQUEST}"
+fi

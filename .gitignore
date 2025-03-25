@@ -1,0 +1,8 @@
+.idea/
+.code/
+__pycache__/
+*.egg-info/
+.DS_Store
+tests/*/.secret
+tests/*/*.db
+tests/*/*.pem

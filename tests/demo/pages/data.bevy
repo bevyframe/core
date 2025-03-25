@@ -1,0 +1,8 @@
+<!DOCTYPE Page>
+<Page title="Data" description="BevyFrame App" color="{{ context.user.id.settings.theme_color }}" icon="" author="" loginRequired="true">
+    <Root>
+        <Form method="POST" action="/data.py">
+            <Textbox name="entry" value="{{ context.data['value'] }}" />
+        </Form>
+    </Root>
+</Page>

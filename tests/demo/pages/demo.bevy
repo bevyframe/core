@@ -1,0 +1,27 @@
+<!DOCTYPE Page>
+<Page title="BevyFrame Test App" description="Demo App" color="blank" icon="/favicon.ico" author="author" loginRequired="true">
+    <OpenGraph title="BevyFrame Test App" type="website" description="Demo App" image="/favicon.ico" url="https://example.com/" />
+    <Navbar>
+        <NavItem icon="home" alt="Home" link="/" status="active" />
+        <NavItem icon="apps" alt="Environment" link="/env.html" status="inactive" />
+    </Navbar>
+    <Root leftMargin="80px">
+        <Container id="info" bottomMargin="10px">
+            <MiniButton onClick="load_info()">Load Info</MiniButton>
+        </Container>
+        <Box width="max-content" textAlign="center">
+            <Line>
+                <Textbox name="" type="text" placeholder="textbox" value="{{ context.ip }}"/>
+            </Line>
+            <Line>
+                <Button>Button</Button>
+            </Line>
+            <Line>
+                <SmallButton>Button</SmallButton>
+            </Line>
+            <Line>
+                <MiniButton>Button</MiniButton>
+            </Line>
+        </Box>
+    </Root>
+</Page>

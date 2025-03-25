@@ -1,0 +1,35 @@
+#!/bin/sh
+CWD="$(pwd)"
+
+if [ -d "build" ]; then
+  rm -rf build
+fi
+mkdir build build/tarball
+
+# /opt/bevyframe/bin/bevyframe
+cd src/bevyframe || exit
+go build || exit
+cd "${CWD}" || exit
+
+# /opt/bevyframe/bin/bevyframe_page
+cd src/bevyframe_page || exit
+go build || exit
+cd "${CWD}" || exit
+
+# /opt/bevyframe
+mkdir build/tarball/bin
+mv src/bevyframe/bevyframe build/tarball/bin/bevyframe
+chmod +x build/tarball/bin/bevyframe
+mv src/bevyframe_page/bevyframe_page build/tarball/bin/bevyframe_page
+chmod +x build/tarball/bin/bevyframe_page
+cp -r src/scripts build/tarball/scripts
+
+mkdir dist
+cd build/tarball || exit
+# shellcheck disable=SC2035
+tar -cvf "${CWD}/dist/bevyframe.tar" *
+cd "${CWD}/dist" || exit
+gzip bevyframe.tar
+cd "${CWD}" || exit
+
+sudo
