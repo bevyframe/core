@@ -38,5 +38,17 @@
   "production": {
     "host": "0.0.0.0",
     "port": 80
+  },
+  "sdks": {
+    "python": "/Users/islekcaganmert/src/islekcaganmert/bevyframe/.venv/bin/bevyframe_py",
+    "html": "/Users/islekcaganmert/src/islekcaganmert/bevyframe/.venv/bin/bevyframe_html",
+    "golang": "",
+    "rust": "",
+    "c#": "",
+    "java": "",
+    "php": "",
+    "ruby": "",
+    "c": "",
+    "c++": ""
   }
 }
