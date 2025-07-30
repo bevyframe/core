@@ -1,7 +1,7 @@
 const get = (context) => {
     return Page({
         title: "BevyFrame Test App",
-        themeColor: "blank",
+        color: context.user.id.settings.theme_color,
     }, [
         Navbar([
             NavItem("home", "/", "Home", true),
@@ -9,7 +9,7 @@ const get = (context) => {
         ]),
         Root({
             margin: Margin({
-                left: Size.pixel(100)
+                left: Size.pixel(80)
             })
         }, [
             Container({
@@ -18,19 +18,19 @@ const get = (context) => {
                     bottom: Size.pixel(10)
                 }),
             }, [
-                Button('mini', {
-                    onclick: "load_info()",
-                    innertext: 'Load Info'
+                MiniButton({
+                    onClick: "load_info()",
+                    innerText: 'Load Info'
                 })
             ]),
             Box({
-                width: Size.max_content,
-                text_align: Align.center,
+                width: Size.maxContent,
+                textAlign: Align.center,
             }, [
                 Line([ Textbox('', {type: "text", placeholder: 'textbox', value: context.ip}) ]),
-                Line([ Button({innertext: 'Button'}) ]),
-                Line([ Button('', {selector: 'small', innertext: 'Button'}) ]),
-                Line([ Button('', {selector: 'mini', innertext: 'Button'}) ])
+                Line([ Button({innerText: 'Button'}) ]),
+                Line([ SmallButton({innerText: 'Button'}) ]),
+                Line([ MiniButton({innerText: 'Button'}) ])
             ])
         ])
     ])

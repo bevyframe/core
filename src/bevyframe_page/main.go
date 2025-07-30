@@ -38,6 +38,7 @@ func main() {
 	fmt.Printf("<meta name=\"author\" content=\"%s\">", page.Author)
 	fmt.Printf("<link rel=\"icon\" href=\"%s\">", page.Icon)
 	fmt.Print("<script src=\"{bevyframe}/bridge.js\"></script>")
+	fmt.Print("<script src=\"{bevyframe}/renderWidget.js\"></script>")
 	fmt.Print("<script src=\"{bevyframe}/widgets.js\"></script>")
 	fmt.Print("<style src=\"{bevyframe}/style.css\"></style>")
 	fmt.Printf("<meta name=\"og:title\" content=\"%s\">", page.OpenGraph.Title)
@@ -46,7 +47,11 @@ func main() {
 	fmt.Printf("<meta name=\"og:url\" content=\"%s\">", page.OpenGraph.URL)
 	fmt.Printf("<meta name=\"og:type\" content=\"%s\">", page.OpenGraph.Type)
 	fmt.Print("</head>")
-	fmt.Printf("<body class=\"body_%s\">", page.Color)
+	loginRequired := ""
+	if page.Root.LoginRequired == "true" {
+		loginRequired = " login-required"
+	}
+	fmt.Printf("<body class=\"body_%s\"%s>", page.Color, loginRequired)
 	fmt.Print("<nav class=\"Navbar\" id=\"navbar\">")
 	for _, item := range page.Navbar.Items {
 		fmt.Printf("<a href=\"%s\" class=\"%s\">", item.Link, item.Status)
@@ -79,11 +84,7 @@ func main() {
 		rootStyle += fmt.Sprintf("vertical-align:%s;", page.Root.VerticalAlign)
 	}
 	rootStyle = strings.ReplaceAll(rootStyle, "\"", "\\\"")
-	loginRequired := ""
-	if page.Root.LoginRequired == "true" {
-		loginRequired = "login-required"
-	}
-	fmt.Printf("<div id=\"root\" style=\""+rootStyle+"\" %s>", loginRequired)
+	fmt.Printf("<div id=\"root\" style=\"" + rootStyle + "\">")
 	fmt.Print(renderWidgets(page.Root.Content))
 	fmt.Print("</div>")
 	fmt.Print("</body>")

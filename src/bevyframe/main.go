@@ -67,6 +67,9 @@ func main() {
 		case "secret":
 			fmt.Println(mainSecret())
 			break
+		case "simulate_request":
+			SimulatedRequest()
+			break
 		default:
 			fmt.Println("Unknown command:", os.Args[1])
 			os.Exit(1)

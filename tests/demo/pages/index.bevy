@@ -1,5 +1,5 @@
 <!DOCTYPE Page>
-<Page title="BevyFrame Test App" description="Demo App" color="blank" icon="/favicon.ico" author="author" loginRequired="true">
+<Page title="BevyFrame Test App" description="Demo App" color="{{ context.user.id.settings.theme_color }}" icon="/favicon.ico" author="author" loginRequired="true">
     <OpenGraph title="BevyFrame Test App" type="website" description="Demo App" image="/favicon.ico" url="https://example.com/" />
     <Navbar>
         <NavItem icon="home" alt="Home" link="/" status="active" />

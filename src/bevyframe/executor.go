@@ -64,8 +64,10 @@ func (context Context) execute(filePath string, reqTime string, bd []byte) Respo
 	if err != nil {
 		return Response{
 			statusCode: 500,
-			headers:    map[string]string{},
-			body:       "Internal Server Error",
+			headers: map[string]string{
+				"Content-Type": "text/html",
+			},
+			body: "<h1>Internal Server Error</h1>`file` command failed",
 		}
 	}
 	cmd := exec.Command("cat")
@@ -75,15 +77,20 @@ func (context Context) execute(filePath string, reqTime string, bd []byte) Respo
 		if err != nil {
 			return Response{
 				statusCode: 500,
-				headers:    map[string]string{},
-				body:       "Internal Server Error",
+				headers: map[string]string{
+					"Content-Type": "text/html",
+				},
+				body: "<h1>Internal Server Error</h1>bevyframe_page failed",
 			}
 		}
-		cmd = exec.Command(context.app.manifest.SDKs["html"], string(out))
-	} else if strings.Contains(string(filetype), "Python script text executable") {
-		cmd = exec.Command(context.app.manifest.SDKs["python"], filePath)
+		cmd = exec.Command(os.Getenv("BEVYFRAME_HTML_SDK"), string(out))
+	} else if strings.Contains(string(filetype), "Python script") {
+		cmd = exec.Command(os.Getenv("BEVYFRAME_PYTHON_SDK"), filePath)
 	} else if strings.Contains(string(filetype), "HTML document text") {
-		cmd = exec.Command(context.app.manifest.SDKs["html"], filePath)
+		cmd = exec.Command(os.Getenv("BEVYFRAME_HTML_SDK"), filePath)
+	} else if strings.Contains(string(filetype), "Java source text") {
+		sdkInfo := strings.Split(os.Getenv("BEVYFRAME_JAVA_SDK"), " ")
+		cmd = exec.Command(sdkInfo[0], "-classpath", sdkInfo[1], filePath)
 	} else {
 		extS := strings.Split(filePath, ".")
 		ext := extS[len(extS)-1]
@@ -96,7 +103,7 @@ func (context Context) execute(filePath string, reqTime string, bd []byte) Respo
 				return Response{
 					statusCode: 500,
 					headers:    map[string]string{},
-					body:       "Internal Server Error",
+					body:       "<h1>Internal Server Error</h1>Failed to read script file",
 				}
 			}
 			renderJSb, err := os.ReadFile("/opt/bevyframe/scripts/renderJS.js")
@@ -104,7 +111,7 @@ func (context Context) execute(filePath string, reqTime string, bd []byte) Respo
 				return Response{
 					statusCode: 500,
 					headers:    map[string]string{},
-					body:       "Internal Server Error",
+					body:       "<h1>Internal Server Error</h1>Failed to render JS",
 				}
 			}
 			renderJS := string(renderJSb)
@@ -123,6 +130,24 @@ func (context Context) execute(filePath string, reqTime string, bd []byte) Respo
 	}
 	cmd.Stdin = bytes.NewReader(b)
 	out, err := cmd.Output()
+	if err != nil {
+		if strings.Contains(err.Error(), "no such file or directory") {
+			return Response{
+				statusCode: 404,
+				headers: map[string]string{
+					"Content-Type": "text/html",
+				},
+				body: "<h1>Not Found</h1>The requested file does not exist.",
+			}
+		}
+		return Response{
+			statusCode: 404,
+			headers: map[string]string{
+				"Content-Type": "text/html",
+			},
+			body: "<h1>Not Found</h1>Script execution failed.",
+		}
+	}
 	out = bytes.ReplaceAll(out, []byte("\r\n"), []byte("\n"))
 	if strings.Contains(string(out), "\n\n<!DOCTYPE html>") {
 		out = []byte(strings.ReplaceAll(string(out), "src=\"{bevyframe}/style.css\">", ">"+context.app.style))
@@ -139,13 +164,10 @@ func (context Context) execute(filePath string, reqTime string, bd []byte) Respo
 			"src=\"{bevyframe}/bridge.js\">", "src=\"/.well-known/bevyframe/bridge.js\"></script><script>"+
 				CreateBridgeScript(),
 		))
-	}
-	if err != nil {
-		return Response{
-			statusCode: 500,
-			headers:    map[string]string{},
-			body:       "Internal Server Error",
-		}
+		out = []byte(strings.ReplaceAll(
+			string(out),
+			"src=\"{bevyframe}/renderWidget.js\">", "src=\"/.well-known/bevyframe/renderWidget.js\"></script>",
+		))
 	}
 
 	lines := bytes.Split(out, []byte("\n"))
@@ -153,7 +175,7 @@ func (context Context) execute(filePath string, reqTime string, bd []byte) Respo
 		return Response{
 			statusCode: 500,
 			headers:    map[string]string{},
-			body:       "Internal Server Error: empty output",
+			body:       "<h1>Internal Server Error</h1>empty output",
 		}
 	}
 	parts := bytes.SplitN(lines[0], []byte(" "), 3)
@@ -168,8 +190,10 @@ func (context Context) execute(filePath string, reqTime string, bd []byte) Respo
 	if err != nil {
 		return Response{
 			statusCode: 500,
-			headers:    map[string]string{},
-			body:       fmt.Sprint("Internal Server Error: ", err),
+			headers: map[string]string{
+				"Content-Type": "text/html",
+			},
+			body: fmt.Sprint("<h1>Internal Server Error</h1> Executable returned unrecognized API"),
 		}
 	}
 	headers := make(map[string]string)
@@ -284,7 +308,11 @@ func (context Context) execute(filePath string, reqTime string, bd []byte) Respo
 			headers["Content-Type"] = "text/plain"
 		} else if strings.HasPrefix(bodyStr, "Response.Type: Error") {
 			statusCode = 500
-			body = context.app.errorHandler(bodyStr)
+			if !strings.HasPrefix(context.headers["User-Agent"], "Mozilla/") {
+				body = []byte(bodyStr)
+			} else {
+				body = context.app.errorHandler(bodyStr)
+			}
 			headers["Content-Type"] = "text/html"
 		} else {
 			statusCode = 200

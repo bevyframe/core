@@ -40,12 +40,12 @@
     "port": 80
   },
   "sdks": {
-    "python": "/Users/islekcaganmert/src/islekcaganmert/bevyframe/.venv/bin/bevyframe_py",
-    "html": "/Users/islekcaganmert/src/islekcaganmert/bevyframe/.venv/bin/bevyframe_html",
+    "python": "/Users/islekcaganmert/src/bevyframe/python-sdk/.venv/bin/bevyframe_py",
+    "html": "/Users/islekcaganmert/src/bevyframe/python-sdk/.venv/bin/bevyframe_html",
     "golang": "",
     "rust": "",
     "c#": "",
-    "java": "",
+    "java": "/usr/bin/java /Users/islekcaganmert/src/bevyframe/java-sdk/target/classes",
     "php": "",
     "ruby": "",
     "c": "",

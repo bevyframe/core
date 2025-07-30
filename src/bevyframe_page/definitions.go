@@ -3,15 +3,16 @@ package main
 import "encoding/xml"
 
 type Page struct {
-	XMLName     xml.Name  `xml:"Page"`
-	Title       string    `xml:"title,attr"`
-	Description string    `xml:"description,attr"`
-	Color       string    `xml:"color,attr"`
-	Icon        string    `xml:"icon,attr"`
-	Author      string    `xml:"author,attr"`
-	OpenGraph   OpenGraph `xml:"OpenGraph"`
-	Navbar      Navbar    `xml:"Navbar"`
-	Root        Root      `xml:"Root"`
+	XMLName       xml.Name  `xml:"Page"`
+	Title         string    `xml:"title,attr"`
+	Description   string    `xml:"description,attr"`
+	Color         string    `xml:"color,attr"`
+	Icon          string    `xml:"icon,attr"`
+	Author        string    `xml:"author,attr"`
+	OpenGraph     OpenGraph `xml:"OpenGraph"`
+	Navbar        Navbar    `xml:"Navbar"`
+	Root          Root      `xml:"Root"`
+	LoginRequired string    `xml:"loginRequired,attr"`
 }
 
 type OpenGraph struct {

@@ -1,6 +1,29 @@
-const buildContext = (inp) => {
+const TheProtocols = {
+    getCurrentUser: async (context) => fetch(
+        `https://${window.location.host}/.well-known/theprotocols`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                network: context.network,
+                endpoint: "current_user_info",
+                body: JSON.stringify({
+                    cred: context.token
+                })
+            })
+        }
+    )
+        .then(response => response.json())
+        .catch(_ => {}),
+};
+
+const buildContext = async (inp) => {
     let context = {
-        headers: {}
+        headers: {},
+        user: {
+            id: {}
+        }
     };
     for (let line of inp.split('\n')) {
         let key = line.split(': ', 2)[0];
@@ -15,6 +38,9 @@ const buildContext = (inp) => {
                 context.email = val;
                 break
             case "Cred.Username":
+                context.username = val;
+                break
+            case "Cred.Network":
                 context.username = val;
                 break
             case "Cred.Password":
@@ -44,5 +70,9 @@ const buildContext = (inp) => {
                 break
         }
     }
+    if (!context.network)
+        context.network = context.email.split('@')[1];
+    context.user.id = await TheProtocols.getCurrentUser(context);
+    document.context = context;
     return context;
 };

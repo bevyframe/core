@@ -5,7 +5,7 @@
         <title>Document</title>
         <style src="{bevyframe}/style.css"></style>
     </head>
-    <body class="body_blank">
+    <body class="body_{{ context.user.id.settings.theme_color }}">
         <h1>Hello, {{ context.user.id.name }}!</h1>
     </body>
 </html>

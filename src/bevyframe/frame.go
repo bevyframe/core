@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -19,6 +21,12 @@ type Frame struct {
 	name     string
 	secret   []byte
 	style    string
+}
+
+type TheProtocolsProxy struct {
+	Network  string `json:"network"`
+	Endpoint string `json:"endpoint"`
+	Body     string `json:"body"`
 }
 
 func newServer(manifest Manifest) Frame {
@@ -41,7 +49,8 @@ func newServer(manifest Manifest) Frame {
 	styleName := strings.Split(manifest.App.Style, ":")[1]
 	var style []byte
 	if styleType == "python" {
-		styleCmd := exec.Command("/Users/islekcaganmert/src/islekcaganmert/bevyframe/.venv/bin/bevystyle_py", styleName)
+		bevystylePy := strings.ReplaceAll(os.Getenv("BEVYFRAME_PYTHON_SDK"), "/bevyframe_py", "/bevystyle_py")
+		styleCmd := exec.Command(bevystylePy, styleName)
 		style, err = styleCmd.Output()
 		if err != nil {
 			fmt.Println("Error running style command:", err)
@@ -88,13 +97,49 @@ func (self Frame) runServer(debug bool) {
 		}
 	})
 	http.HandleFunc("/.well-known/bevyframe/widgets.js", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "/opt/bevyframe/scripts/widgets.js")
+		w.Header().Set("Content-Type", "text/javascript")
+		http.ServeFile(w, r, "/opt/bevyframe/scripts/Widgets.js")
 	})
 	http.HandleFunc("/.well-known/bevyframe/bridge.js", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/javascript")
 		http.ServeFile(w, r, "/opt/bevyframe/scripts/bridge.js")
 	})
+	http.HandleFunc("/.well-known/bevyframe/renderWidget.js", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/javascript")
+		http.ServeFile(w, r, "/opt/bevyframe/scripts/renderWidget.js")
+	})
 	http.HandleFunc("/.well-known/bevyframe/buildContext.js", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/javascript")
 		http.ServeFile(w, r, "/opt/bevyframe/scripts/buildContext.js")
+	})
+	http.HandleFunc("/.well-known/theprotocols", func(w http.ResponseWriter, r *http.Request) {
+		var data TheProtocolsProxy
+		var rawData []byte
+		rawData, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		err = json.Unmarshal(rawData, &data)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			fmt.Println("Data2")
+			return
+		}
+		url := fmt.Sprintf("https://%s/protocols/%s", data.Network, data.Endpoint)
+		bodyReader := strings.NewReader(data.Body)
+		resp, err := http.Post(url, "application/json", bodyReader)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		respBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, err = w.Write(respBody)
 	})
 	http.HandleFunc("/sw.js", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/javascript")
@@ -198,11 +243,23 @@ func (self Frame) runServer(debug bool) {
 		}
 		filePath := fmt.Sprintf("%s/pages%s", pwd, context.path)
 		for key, value := range context.app.manifest.App.Routing {
-			variables, err := matchRouting(key, context.path)
-			if err == nil {
+			if key == context.path || key+"/" == context.path {
 				filePath = fmt.Sprintf("%s/pages%s", pwd, value)
-				for k, v := range variables {
-					context.query[k] = v
+			} else {
+				variables, err := matchRouting(key, context.path)
+				if err == nil {
+					filePath = fmt.Sprintf("%s/pages%s", pwd, value)
+					for k, v := range variables {
+						context.query[k] = v
+					}
+				}
+			}
+		}
+		if r.URL.RawQuery != "" {
+			queryParams := r.URL.Query()
+			for key, values := range queryParams {
+				if len(values) > 0 {
+					context.query[key] = values[0]
 				}
 			}
 		}
@@ -223,6 +280,11 @@ func (self Frame) runServer(debug bool) {
 			return
 		}
 		resp = context.execute(filePath, reqTime, body)
+		if _, ok := resp.headers["Digest"]; !ok {
+			hash := sha256.Sum256([]byte(resp.body))
+			digest := base64.StdEncoding.EncodeToString(hash[:])
+			resp.headers["Digest"] = fmt.Sprintf("SHA-256=%s", digest)
+		}
 		for key, value := range resp.headers {
 			w.Header().Set(key, value)
 		}

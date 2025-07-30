@@ -1,6 +1,7 @@
 /* PAGE SCRIPT HERE */
 
-const buildDocument = () => {
+const buildDocument = async () => {
+    const context = await buildContext(stdin);
     // noinspection JSUnresolvedReference
-    let resp = get(buildContext(stdin));
+    get(context);
 }

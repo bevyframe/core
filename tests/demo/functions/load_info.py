@@ -3,7 +3,6 @@ from bevyframe.Features.ContextManager import get_from_context_manager
 
 
 def load_info(context: Context) -> change_html:
-    last_visited_profile = get_from_context_manager(context.tp.package_name, context.email, 'last_visited_profile')
     return change_html('div#info', [
         Title(f'Hello, {context.user.id.name} {context.user.id.surname} from {context.user.network}!'),
         Label(f"You are using {context.browser.device}"),
@@ -13,5 +12,5 @@ def load_info(context: Context) -> change_html:
         Label(f"Your device has {context.browser.ram} GB of RAM"),
         Label(f"Your bandwith is {context.browser.bandwidth} Mbps"),
         Label(f"Your network type is {context.browser.network_profile}"),
-        Label(f"Your last visited profile is {last_visited_profile}"),
+        Label(f"Your last visited profile is {context.last_visited_profile}"),
     ])

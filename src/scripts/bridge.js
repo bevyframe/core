@@ -1,6 +1,6 @@
 const _bridge = async (func, ...args) => {
     let resp = await fetch(`${location.protocol}//${location.host}/.well-known/bevyframe/proxy`,{
-        method:'POST',
+        method: 'POST',
         headers: {
             'Content-Type':'application/json'
         },

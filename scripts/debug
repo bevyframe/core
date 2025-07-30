@@ -2,3 +2,4 @@
 cd "${PROJECT_ROOT}" || exit
 GOOS=darwin GOARCH=arm64 "${PROJECT_ROOT:-}/scripts/compile" || exit
 sudo dist/bevyframe_installer_darwin_arm64
+rm -rf build
