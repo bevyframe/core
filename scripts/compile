@@ -41,5 +41,8 @@ cd "${PROJECT_ROOT}/src/installer" || exit
 gzip bevyframe.tar
 rm "${PROJECT_ROOT}/dist/bevyframe_installer_${GOOS}_${GOARCH}" > /dev/null 2>&1
 go build -o "${PROJECT_ROOT}/dist/bevyframe_installer_${GOOS}_${GOARCH}" || exit
+if [[ "${GOOS}" == "linux" ]]; then
+  cat bevyframe.tar.gz >  "${PROJECT_ROOT}/dist/bevyframe_${GOOS}_${GOARCH}.tar.gz"
+fi
 rm bevyframe.tar.gz
 cd "${PROJECT_ROOT}" || exit
