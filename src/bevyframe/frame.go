@@ -98,19 +98,19 @@ func (self Frame) runServer(debug bool) {
 	})
 	http.HandleFunc("/.well-known/bevyframe/widgets.js", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/javascript")
-		http.ServeFile(w, r, "/opt/bevyframe/scripts/Widgets.js")
+		http.ServeFile(w, r, FindInstallation()+"/scripts/Widgets.js")
 	})
 	http.HandleFunc("/.well-known/bevyframe/bridge.js", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/javascript")
-		http.ServeFile(w, r, "/opt/bevyframe/scripts/bridge.js")
+		http.ServeFile(w, r, FindInstallation()+"/scripts/bridge.js")
 	})
 	http.HandleFunc("/.well-known/bevyframe/renderWidget.js", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/javascript")
-		http.ServeFile(w, r, "/opt/bevyframe/scripts/renderWidget.js")
+		http.ServeFile(w, r, FindInstallation()+"/scripts/renderWidget.js")
 	})
 	http.HandleFunc("/.well-known/bevyframe/buildContext.js", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/javascript")
-		http.ServeFile(w, r, "/opt/bevyframe/scripts/buildContext.js")
+		http.ServeFile(w, r, FindInstallation()+"/scripts/buildContext.js")
 	})
 	http.HandleFunc("/.well-known/theprotocols", func(w http.ResponseWriter, r *http.Request) {
 		var data TheProtocolsProxy

@@ -56,7 +56,7 @@ func main() {
 			mainRun(false)
 			break
 		case "version":
-			fmt.Println("BevyFrame 0.6 ⍺")
+			fmt.Printf("BevyFrame 0.6 ⍺ (%s)\n", FindInstallation())
 			break
 		case "help":
 			fmt.Println("Usage: bevyframe <command>")

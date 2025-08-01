@@ -109,7 +109,7 @@ func (self Frame) processPWA() ([]byte, error) {
 }
 
 func (frame Frame) getServiceWorker() ([]byte, error) {
-	file, err := os.Open("/opt/bevyframe/scripts/sw.js")
+	file, err := os.Open(FindInstallation() + "/scripts/sw.js")
 	if err != nil {
 		return []byte{}, fmt.Errorf("failed to open manifest.json: %w", err)
 	}

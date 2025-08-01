@@ -98,7 +98,7 @@ func (context Context) loadPage(str string) Page {
 }
 
 func (p Page) createHTML(script string) string {
-	filePath := "/opt/bevyframe/scripts/renderWidget.js"
+	filePath := FindInstallation() + "/scripts/renderWidget.js"
 	content, err := os.ReadFile(filePath)
 	if err != nil {
 		fmt.Println("Error reading file:", err)

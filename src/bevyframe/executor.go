@@ -72,7 +72,7 @@ func (context Context) execute(filePath string, reqTime string, bd []byte) Respo
 	}
 	cmd := exec.Command("cat")
 	if strings.HasSuffix(filePath, ".bevy") {
-		cmdP := exec.Command("/opt/bevyframe/bin/bevyframe_page", filePath)
+		cmdP := exec.Command(FindInstallation()+"/bin/bevyframe_page", filePath)
 		out, err := cmdP.Output()
 		if err != nil {
 			return Response{
@@ -106,7 +106,7 @@ func (context Context) execute(filePath string, reqTime string, bd []byte) Respo
 					body:       "<h1>Internal Server Error</h1>Failed to read script file",
 				}
 			}
-			renderJSb, err := os.ReadFile("/opt/bevyframe/scripts/renderJS.js")
+			renderJSb, err := os.ReadFile(FindInstallation() + "/scripts/renderJS.js")
 			if err != nil {
 				return Response{
 					statusCode: 500,
